@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+  
+<head>
+    <script>document.documentElement.classList.add('js')</script>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Checkout &mdash; Liva Skincare</title>
+    <meta name="description" content="Secure checkout for Liva Skincare orders. Standard, Express, and Same-Day delivery with KHQR, ABA, ACLEDA, Wing, or Cash on Delivery.">
+    <meta name="theme-color" content="#0c6b58">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com/">
+    <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=Plus+Jakarta+Sans:wght@600;700;800&amp;display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="css/vendor/bootstrap.min.css">
+    <link rel="stylesheet" href="css/style.css?v=1795072645">
+  </head>
+  <body class="checkout-page">
+
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <!-- Header / Simple Brand Bar -->
+    <header class="checkout-header">
+      <div class="container checkout-header__inner">
+        <a class="emp-brand" href="index.html" aria-label="Liva Skincare home">
+          <span class="emp-brand__mark" aria-hidden="true">
+            <img src="images/logo.png" width="38" height="38" alt="Liva Logo" class="emp-brand__logo" style="height:38px;width:auto;object-fit:contain;border-radius:0;box-shadow:none;">
+          </span>
+          <span class="emp-brand__name">Liva</span>
+        </a>
+        <div class="checkout-secure-badge">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          <span>256-Bit SSL Encrypted Checkout</span>
+        </div>
+      </div>
+    </header>
+
+    <main id="main" class="checkout-main">
+      <div class="container">
+
+        <!-- Navigation back link -->
+        <div class="checkout-back">
+          <a href="product.html" class="checkout-back__link">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+            <span>Continue Shopping</span>
+          </a>
+        </div>
+
+        <form id="checkoutOrderForm" class="checkout-grid" onsubmit="event.preventDefault(); handleOrderSubmit();">
+
+          <!-- Left Column: Customer & Delivery Details -->
+          <div class="checkout-content">
+            <section class="native-sec">
+              <div class="native-sec__head">
+                <span class="native-sec__badge">1</span>
+                <h2>Customer &amp; Delivery Details</h2>
+              </div>
+
+              <div class="native-form-group">
+                <label for="username" class="native-label">Username / Full Name <span class="req">*</span></label>
+                <input type="text" id="username" name="username" class="native-input" placeholder="e.g. Chan Dara" required autocomplete="name">
+              </div>
+
+              <div class="native-form-group">
+                <label for="phone" class="native-label">Phone Number <span class="req">*</span></label>
+                <input type="tel" id="phone" name="phone" class="native-input" placeholder="e.g. 012 345 678" required autocomplete="tel">
+              </div>
+
+              <div class="native-form-group">
+                <label for="address" class="native-label">Delivery Address <span class="req">*</span></label>
+                <input type="text" id="address" name="address" class="native-input" placeholder="House #, Street name, Sangkat, Khan, City" required autocomplete="street-address">
+              </div>
+
+              <div class="native-form-group">
+                <label for="note" class="native-label">Order Note (Optional)</label>
+                <textarea id="note" name="note" class="native-input native-textarea" placeholder="Special delivery instructions or gate code..." rows="3"></textarea>
+              </div>
+            </section>
+          </div>
+
+          <!-- Right Column: Order Summary + Shipping + Payment under Total -->
+          <div class="checkout-sidebar">
+            <div class="native-summary">
+              <h3>Order Summary</h3>
+              
+              <!-- Cart Items List (populated dynamically from Cart / localStorage) -->
+              <ul class="native-summary-items" id="summaryItemList">
+                <!-- Fallback item if user directly visited checkout with empty cart -->
+                <li class="native-sitem">
+                  <img src="images/daily-edit.png" class="native-sitem__img" alt="Liva Skincare Set">
+                  <div class="native-sitem__mid">
+                    <span class="native-sitem__name">Liva Complete Skincare Ritual Duo</span>
+                    <span class="native-sitem__qty">Qty: 1</span>
+                  </div>
+                  <span class="native-sitem__price">$69.00</span>
+                </li>
+              </ul>
+
+              <!-- Pricing breakdown -->
+              <div class="native-breakdown">
+                <div class="native-row">
+                  <span>Subtotal</span>
+                  <strong id="chkSubtotal">$69.00</strong>
+                </div>
+                <div class="native-row">
+                  <span>Shipping</span>
+                  <span id="chkShipping">$1.50</span>
+                </div>
+                <div class="native-row native-row--total">
+                  <span>Total</span>
+                  <strong class="native-grand-total" id="chkGrandTotal">$70.50</strong>
+                </div>
+              </div>
+
+              <!-- 2. Shipping Options (Moved under the summary total) -->
+              <section class="native-sec">
+                <div class="native-sec__head">
+                  <span class="native-sec__badge">2</span>
+                  <h2>Choose Shipping Method</h2>
+                </div>
+
+                <div class="native-options-list">
+                  <label class="native-option is-active" data-ship-opt>
+                    <input type="radio" name="shipping_method" value="standard" checked onchange="updateShipping(this, 1.50)">
+                    <div class="native-option__body">
+                      <div class="native-option__title">
+                        <strong>Standard Courier Delivery</strong>
+                        <span class="native-option__price" id="ship-std-price">$1.50</span>
+                      </div>
+                      <p class="native-option__sub">Delivered in 1–2 business days (Free over $49)</p>
+                    </div>
+                  </label>
+
+                  <label class="native-option" data-ship-opt>
+                    <input type="radio" name="shipping_method" value="express" onchange="updateShipping(this, 2.50)">
+                    <div class="native-option__body">
+                      <div class="native-option__title">
+                        <strong>Express Priority Delivery</strong>
+                        <span class="native-option__price">$2.50</span>
+                      </div>
+                      <p class="native-option__sub">Priority dispatched within 4 hours</p>
+                    </div>
+                  </label>
+
+                  <label class="native-option" data-ship-opt>
+                    <input type="radio" name="shipping_method" value="sameday" onchange="updateShipping(this, 2.00)">
+                    <div class="native-option__body">
+                      <div class="native-option__title">
+                        <strong>Same-Day Phnom Penh Delivery</strong>
+                        <span class="native-option__price">$2.00</span>
+                      </div>
+                      <p class="native-option__sub">Order before 3:00 PM for same-day delivery</p>
+                    </div>
+                  </label>
+                </div>
+              </section>
+
+              <!-- 3. Payment Methods (COD, Bank Transfer: ABA, Wing, ACLEDA, KHQR) -->
+              <section class="native-sec">
+                <div class="native-sec__head">
+                  <span class="native-sec__badge">3</span>
+                  <h2>Choose Payment Method</h2>
+                </div>
+
+                <div class="native-options-list">
+                  
+                  <!-- Cash on Delivery -->
+                  <label class="native-option is-active" data-pay-opt>
+                    <input type="radio" name="payment_method" value="cod" checked onchange="togglePaymentMethod('cod')">
+                    <div class="native-option__body">
+                      <div class="native-option__title">
+                        <span class="native-pay-name">Cash On Delivery (COD)</span>
+                      </div>
+                      <p class="native-option__sub">Pay in cash directly upon receipt of your package</p>
+                    </div>
+                  </label>
+
+                  <!-- Bank & KHQR Transfer -->
+                  <label class="native-option" data-pay-opt>
+                    <input type="radio" name="payment_method" value="bank" onchange="togglePaymentMethod('bank')">
+                    <div class="native-option__body">
+                      <div class="native-option__title">
+                        <span class="native-pay-name">Bank Transfer &amp; KHQR</span>
+                      </div>
+                      <p class="native-option__sub">Pay via Bakong KHQR, ABA Bank, ACLEDA Bank, or Wing Bank</p>
+                    </div>
+                  </label>
+
+                </div>
+
+                <!-- Bank details drawer (Shown when Bank Transfer selected) -->
+                <div class="native-bank-panel" id="bankPaymentDetails" style="display: none;">
+                  <p class="native-bank-panel__intro">Select your bank or scan with any mobile banking app:</p>
+
+                  <div class="native-bank-tabs">
+                    <button type="button" class="native-bank-tab is-active" onclick="switchBankTab('khqr', this)">
+                      <img src="images/payments/bakong-khqr-icon.png" alt="KHQR">
+                      <span>KHQR</span>
+                    </button>
+                    <button type="button" class="native-bank-tab" onclick="switchBankTab('aba', this)">
+                      <img src="images/payments/aba.png" alt="ABA Bank">
+                      <span>ABA</span>
+                    </button>
+                    <button type="button" class="native-bank-tab" onclick="switchBankTab('acleda', this)">
+                      <img src="images/payments/acleda.png" alt="ACLEDA Bank">
+                      <span>ACLEDA</span>
+                    </button>
+                    <button type="button" class="native-bank-tab" onclick="switchBankTab('wing', this)">
+                      <img src="images/payments/wing.jpg" alt="Wing Bank">
+                      <span>Wing</span>
+                    </button>
+                  </div>
+
+                  <!-- QR & Account Display Card -->
+                  <div class="native-qr-display" id="bankDisplayBox">
+                    <div class="native-qr-visual">
+                      <img src="images/payments/khqr.png" alt="Bakong KHQR Code" class="native-qr-img" id="bankQrImage">
+                      <span class="native-qr-scan-tag">Scan to Pay in any App</span>
+                    </div>
+                    <div class="native-qr-meta">
+                      <span class="native-meta-label">Account Name:</span>
+                      <strong class="native-meta-val" id="bankAccName">LIVA BOTANICAL SKINCARE</strong>
+                      
+                      <span class="native-meta-label" style="margin-top: 10px;">Account Number:</span>
+                      <div class="native-copy-val">
+                        <strong id="bankAccNum">001 234 567 (USD / KHR)</strong>
+                        <button type="button" class="native-copy-btn" onclick="copyAccNum()">Copy</button>
+                      </div>
+                      <p class="native-meta-hint">Transfer screenshot can be shared with our delivery messenger or telegram.</p>
+                    </div>
+                  </div>
+                </div>
+
+              </section>
+
+              <!-- Complete Order Button -->
+              <div class="native-submit-wrap">
+                <button type="submit" class="btn-native-order" id="placeOrderBtn">
+                  Place Order &mdash; <span id="btnTotalDisplay">$0.00</span>
+                </button>
+                <p class="native-policy-note">By placing your order, you agree to Liva Skincare's Terms of Service and 30-Day Authentic Guarantee.</p>
+              </div>
+
+              <!-- Perks -->
+              <ul class="native-perks">
+                <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M20 6L9 17l-5-5"/></svg> 100% Authentic Organic Botanical Extracts</li>
+                <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M20 6L9 17l-5-5"/></svg> 30-Day Money Back Guarantee</li>
+                <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M20 6L9 17l-5-5"/></svg> Free shipping on orders over $49.00</li>
+              </ul>
+
+            </div>
+          </div>
+
+        </form>
+
+      </div>
+    </main>
+
+    <!-- Success Modal -->
+    <div class="order-modal-overlay" id="orderSuccessModal" style="display: none;">
+      <div class="order-modal-card">
+        <div class="order-modal-check">✓</div>
+        <h2>Thank You For Your Order!</h2>
+        <p class="order-modal-sub">Your order has been received and is being prepared with pure botanical care.</p>
+        
+        <div class="order-modal-details">
+          <div class="order-modal-row">
+            <span>Order Number:</span>
+            <strong id="modalOrderNum">#LIV-89421</strong>
+          </div>
+          <div class="order-modal-row">
+            <span>Customer:</span>
+            <strong id="modalCustomer">Chan Dara</strong>
+          </div>
+          <div class="order-modal-row">
+            <span>Total Amount:</span>
+            <strong id="modalTotal" style="color: var(--brand);">$70.50</strong>
+          </div>
+          <div class="order-modal-row">
+            <span>Payment Method:</span>
+            <strong id="modalPayment">Cash on Delivery</strong>
+          </div>
+        </div>
+
+        <p class="order-modal-note">Our courier will contact your phone before dispatch. Feel free to contact our support on Telegram if you need any adjustments.</p>
+        <a href="index.html" class="btn-emp btn-emp--primary btn-emp--block">Return to Store</a>
+      </div>
+    </div>
+
+    <!-- Toasts -->
+    <div class="toasts" data-toasts aria-live="polite" aria-atomic="false"></div>
+
+    <script src="js/vendor/bootstrap.bundle.min.js"></script>
+    <script src="js/main.js"></script>
+    <script>
+      var currentShippingFee = 1.50;
+      var currentSubtotal = 69.00;
+      var bankData = {
+        khqr: {
+          name: "LIVA BOTANICAL SKINCARE",
+          num: "001 234 567 (USD / KHR)",
+          img: "images/payments/khqr.png"
+        },
+        aba: {
+          name: "LIVA BOTANICAL SKINCARE",
+          num: "001 234 567",
+          img: "images/payments/khqr.png"
+        },
+        acleda: {
+          name: "LIVA BOTANICAL SKINCARE",
+          num: "1234-5678-9012",
+          img: "images/payments/khqr.png"
+        },
+        wing: {
+          name: "LIVA BOTANICAL SKINCARE",
+          num: "012 345 678",
+          img: "images/payments/khqr.png"
+        }
+      };
+
+      function money(n) { return "$" + parseFloat(n).toFixed(2); }
+
+      function loadCartItems() {
+        var items = [];
+        try {
+          var raw = localStorage.getItem("liva_cart");
+          if (raw) items = JSON.parse(raw);
+        } catch (e) {}
+
+        var listEl = document.getElementById("summaryItemList");
+        if (items && items.length > 0) {
+          currentSubtotal = items.reduce(function(s, it) { return s + it.price * it.qty; }, 0);
+          listEl.innerHTML = items.map(function(it) {
+            return '<li class="native-sitem">' +
+              '<img src="' + it.img + '" class="native-sitem__img" alt="' + it.name + '">' +
+              '<div class="native-sitem__mid">' +
+                '<span class="native-sitem__name">' + it.name + '</span>' +
+                '<span class="native-sitem__qty">Qty: ' + it.qty + '</span>' +
+              '</div>' +
+              '<span class="native-sitem__price">' + money(it.price * it.qty) + '</span>' +
+            '</li>';
+          }).join("");
+        } else {
+          currentSubtotal = 69.00;
+        }
+
+        recalculateTotal();
+      }
+
+      function updateShipping(radio, fee) {
+        document.querySelectorAll("[data-ship-opt]").forEach(function(el) {
+          el.classList.toggle("is-active", el.contains(radio));
+        });
+        currentShippingFee = (currentSubtotal >= 49 && radio.value === "standard") ? 0 : fee;
+        recalculateTotal();
+      }
+
+      function recalculateTotal() {
+        var stdPriceEl = document.getElementById("ship-std-price");
+        if (currentSubtotal >= 49 && stdPriceEl) {
+          stdPriceEl.textContent = "FREE";
+        }
+        var total = currentSubtotal + currentShippingFee;
+        document.getElementById("chkSubtotal").textContent = money(currentSubtotal);
+        document.getElementById("chkShipping").textContent = currentShippingFee === 0 ? "FREE" : money(currentShippingFee);
+        document.getElementById("chkGrandTotal").textContent = money(total);
+        document.getElementById("btnTotalDisplay").textContent = money(total);
+      }
+
+      function togglePaymentMethod(type) {
+        var bankPanel = document.getElementById("bankPaymentDetails");
+        var opts = document.querySelectorAll("[data-pay-opt]");
+        opts.forEach(function(opt) {
+          var isCurrent = opt.querySelector('input[value="' + type + '"]');
+          opt.classList.toggle("is-active", !!isCurrent);
+        });
+        if (type === "bank") {
+          bankPanel.style.display = "block";
+        } else {
+          bankPanel.style.display = "none";
+        }
+      }
+
+      function switchBankTab(key, btn) {
+        document.querySelectorAll(".native-bank-tab").forEach(function(t) { t.classList.remove("is-active"); });
+        btn.classList.add("is-active");
+        var d = bankData[key] || bankData.khqr;
+        document.getElementById("bankAccName").textContent = d.name;
+        document.getElementById("bankAccNum").textContent = d.num;
+        document.getElementById("bankQrImage").src = d.img;
+      }
+
+      function copyAccNum() {
+        var num = document.getElementById("bankAccNum").textContent;
+        if (navigator.clipboard) {
+          navigator.clipboard.writeText(num);
+          if (window.toast) window.toast("Account number copied: " + num);
+        }
+      }
+
+      function handleOrderSubmit() {
+        var name = document.getElementById("username").value.trim();
+        var phone = document.getElementById("phone").value.trim();
+        var addr = document.getElementById("address").value.trim();
+        if (!name || !phone || !addr) return;
+
+        var isBank = document.querySelector('input[name="payment_method"]:checked').value === "bank";
+        var payMethodName = isBank ? "Bank Transfer / KHQR" : "Cash on Delivery";
+        var orderNum = "#LIV-" + Math.floor(10000 + Math.random() * 90000);
+
+        document.getElementById("modalOrderNum").textContent = orderNum;
+        document.getElementById("modalCustomer").textContent = name + " (" + phone + ")";
+        document.getElementById("modalTotal").textContent = money(currentSubtotal + currentShippingFee);
+        document.getElementById("modalPayment").textContent = payMethodName;
+
+        // Clear cart
+        try {
+          if (window.Cart && window.Cart.clear) window.Cart.clear();
+          localStorage.removeItem("liva_cart");
+        } catch (e) {}
+
+        document.getElementById("orderSuccessModal").style.display = "flex";
+      }
+
+      document.addEventListener("DOMContentLoaded", function() {
+        loadCartItems();
+      });
+    </script>
+  </body>
+</html>
