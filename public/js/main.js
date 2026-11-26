@@ -25,6 +25,20 @@
     return Promise.resolve();
   }
 
+  var DEFAULT_IMG = window.location.pathname.indexOf("/km/") !== -1
+    ? "../images/hair-mask.webp"
+    : (window.location.pathname.indexOf(".html") !== -1 ? "images/hair-mask.webp" : "/images/hair-mask.webp");
+  function resolveImg(path) {
+    if (!path) return DEFAULT_IMG;
+    if (window.location.pathname.indexOf("/km/") !== -1 && path.indexOf("/images/") === 0) {
+      return ".." + path;
+    }
+    if (window.location.pathname.indexOf(".html") !== -1 && path.indexOf("/images/") === 0) {
+      return path.slice(1);
+    }
+    return path;
+  }
+
   var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   var money = function (n) {
     if (typeof n === "string") {
@@ -199,7 +213,7 @@
             id: String(it.id || ("fav-" + Math.random().toString(36).substr(2, 6))),
             name: String(it.name || "Skincare Product"),
             price: isNaN(p) ? 24.00 : p,
-            img: String(it.img || "/images/hair-mask.webp")
+            img: resolveImg(String(it.img || DEFAULT_IMG))
           };
         });
       } catch (e) {
@@ -266,7 +280,7 @@
         els.list.style.display = isEmpty ? "none" : "block";
         if (!isEmpty) {
           els.list.innerHTML = items.map(function (it) {
-            var itemImg = it.img || "/images/hair-mask.webp";
+            var itemImg = resolveImg(it.img || DEFAULT_IMG);
             return '<li class="witem">' +
               '<img class="witem__img" src="' + itemImg + '" width="64" height="64" alt="' + it.name + '" loading="lazy">' +
               '<div class="witem__mid">' +
@@ -303,7 +317,7 @@
           id: String(product.id || ("fav-" + Math.random().toString(36).substr(2, 6))),
           name: String(product.name || "Skincare Product"),
           price: parseFloat(product.price) || 24.00,
-          img: String(product.img || "/images/hair-mask.webp")
+          img: resolveImg(String(product.img || DEFAULT_IMG))
         });
         persist();
         render();
@@ -562,7 +576,7 @@
       if (els.list) {
         els.list.innerHTML = items.map(function (it) {
           return '<li class="citem">' +
-            '<img class="citem__img" src="' + it.img + '" width="64" height="64" alt="" loading="lazy">' +
+            '<img class="citem__img" src="' + resolveImg(it.img) + '" width="64" height="64" alt="" loading="lazy">' +
             '<div class="citem__mid">' +
               '<span class="citem__name">' + it.name + '</span>' +
               '<span class="citem__price">' + money(it.price) + ' ' + t("each", "each") + '</span>' +
@@ -915,7 +929,7 @@
               id: item.getAttribute("data-id") || ("bundle-" + Math.random().toString(36).substr(2, 6)),
               name: item.getAttribute("data-name") || "Skincare Set Item",
               price: parseFloat(item.getAttribute("data-price")) || 24.00,
-              img: item.getAttribute("data-img") || "/images/hair-mask.webp",
+              img: resolveImg(item.getAttribute("data-img") || DEFAULT_IMG),
               qty: qty
             });
           }
@@ -933,7 +947,7 @@
             id: first.getAttribute("data-id") || "bundle-1",
             name: first.getAttribute("data-name") || "Charlotte Tilbury Magic Skin Duo",
             price: parseFloat(first.getAttribute("data-price")) || 69.00,
-            img: first.getAttribute("data-img") || "/images/hair-mask.webp",
+            img: resolveImg(first.getAttribute("data-img") || DEFAULT_IMG),
             qty: 1
           });
         }
