@@ -5,6 +5,26 @@
 (function () {
   "use strict";
 
+  var I18N = window.LIVA_I18N || {};
+  function t(key, fallback) {
+    return Object.prototype.hasOwnProperty.call(I18N, key) && I18N[key] ? I18N[key] : fallback;
+  }
+  function copyText(text) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      return navigator.clipboard.writeText(text).catch(function () {});
+    }
+    var ta = document.createElement("textarea");
+    ta.value = text;
+    ta.setAttribute("readonly", "");
+    ta.style.position = "fixed";
+    ta.style.opacity = "0";
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand("copy"); } catch (e) {}
+    document.body.removeChild(ta);
+    return Promise.resolve();
+  }
+
   var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   var money = function (n) {
     if (typeof n === "string") {
@@ -216,7 +236,7 @@
         btn.classList.toggle("is-active", active);
         if (btn.hasAttribute("data-set-wishlist")) {
           var label = btn.querySelector("span");
-          if (label) label.textContent = active ? "In Wishlist" : "Add To Wishlist";
+          if (label) label.textContent = active ? t("inWishlist", "In Wishlist") : t("addToWishlist", "Add To Wishlist");
         }
       });
     }
@@ -254,8 +274,8 @@
                 '<span class="witem__price">' + money(it.price) + '</span>' +
               '</div>' +
               '<div class="witem__right">' +
-                '<button type="button" class="witem__addbtn" data-wish-to-cart="' + it.id + '">+ Add to Cart</button>' +
-                '<button type="button" class="witem__remove" data-wish-remove="' + it.id + '">Remove</button>' +
+                '<button type="button" class="witem__addbtn" data-wish-to-cart="' + it.id + '">' + t("wishAddToCart", "+ Add to Cart") + '</button>' +
+                '<button type="button" class="witem__remove" data-wish-remove="' + it.id + '">' + t("remove", "Remove") + '</button>' +
               '</div>' +
             '</li>';
           }).join("");
@@ -276,7 +296,7 @@
         items.splice(idx, 1);
         persist();
         render();
-        toast("Removed from favorites");
+        toast(t("removedFav", "Removed from favorites"));
         return false;
       } else {
         items.push({
@@ -287,7 +307,7 @@
         });
         persist();
         render();
-        toast("Added to favorites");
+        toast(t("addedFav", "Added to favorites"));
         if (shouldOpen !== false) {
           open();
         }
@@ -299,14 +319,14 @@
       items = items.filter(function (it) { return it.id !== id; });
       persist();
       render();
-      toast("Removed from favorites");
+      toast(t("removedFav", "Removed from favorites"));
     }
 
     function clear() {
       items = [];
       persist();
       render();
-      toast("Favorites cleared");
+      toast(t("clearedFav", "Favorites cleared"));
     }
 
     function open() {
@@ -396,7 +416,7 @@
           var it = items.filter(function (x) { return x.id === id; })[0];
           if (it && window.Cart) {
             window.Cart.add({ id: it.id, name: it.name, price: it.price, img: it.img }, 1);
-            toast("Moved " + it.name + " to cart");
+            toast(t("movedToCart", "Moved :name to cart").replace(":name", it.name));
             close();
             window.Cart.open();
           }
@@ -412,7 +432,7 @@
             items.forEach(function (it) {
               window.Cart.add({ id: it.id, name: it.name, price: it.price, img: it.img }, 1);
             });
-            toast("Added all favorites to cart");
+            toast(t("addedAllFav", "Added all favorites to cart"));
             close();
             window.Cart.open();
           }
@@ -545,7 +565,7 @@
             '<img class="citem__img" src="' + it.img + '" width="64" height="64" alt="" loading="lazy">' +
             '<div class="citem__mid">' +
               '<span class="citem__name">' + it.name + '</span>' +
-              '<span class="citem__price">' + money(it.price) + ' each</span>' +
+              '<span class="citem__price">' + money(it.price) + ' ' + t("each", "each") + '</span>' +
               '<div class="citem__ctrls">' +
                 '<button type="button" class="citem__qtybtn" data-dec="' + it.id + '" aria-label="Decrease quantity of ' + it.name + '">−</button>' +
                 '<span class="citem__qty">' + it.qty + '</span>' +
@@ -554,7 +574,7 @@
             '</div>' +
             '<div class="citem__right">' +
               '<span class="citem__line">' + money(it.price * it.qty) + '</span>' +
-              '<button type="button" class="citem__remove" data-remove="' + it.id + '">Remove</button>' +
+              '<button type="button" class="citem__remove" data-remove="' + it.id + '">' + t("remove", "Remove") + '</button>' +
             '</div>' +
           '</li>';
         }).join("");
@@ -568,10 +588,10 @@
       if (els.shipBar) els.shipBar.style.width = pct + "%";
       if (els.shipMsg) {
         if (sub >= FREE_SHIP) {
-          els.shipMsg.innerHTML = "🎉 You've unlocked <strong>free shipping</strong>!";
+          els.shipMsg.innerHTML = "🎉 " + t("shipFree", "You've unlocked free shipping!");
           els.shipMsg.classList.add("is-free");
         } else {
-          els.shipMsg.innerHTML = "Add <strong>" + money(FREE_SHIP - sub) + "</strong> more for free shipping";
+          els.shipMsg.innerHTML = t("shipMore", "Add :amount more for free shipping").replace(":amount", "<strong>" + money(FREE_SHIP - sub) + "</strong>");
           els.shipMsg.classList.remove("is-free");
         }
       }
@@ -584,7 +604,7 @@
       else items.push({ id: product.id, name: product.name, price: product.price, img: product.img, qty: qty });
       persist();
       render();
-      toast(product.name + " added to cart");
+      toast(product.name + " " + t("addedToCart", "added to cart"));
     }
 
     var lastFocus = null;
@@ -825,7 +845,8 @@
         }
       });
       if (addBtn) {
-        addBtn.textContent = total > 0 ? "Add To Cart · $" + total.toFixed(2) : "Add To Cart";
+        var baseAddLabel = t("addToCart", "Add To Cart");
+        addBtn.textContent = total > 0 ? baseAddLabel + " · $" + total.toFixed(2) : baseAddLabel;
       }
     }
 
@@ -925,21 +946,42 @@
       });
     }
 
-    // Sub-actions (compare, share; wishlist is handled by Wishlist module)
+    // Sub-actions (compare, share, social sharing; wishlist is handled by Wishlist module)
     var compBtn = document.querySelector("[data-set-compare]");
     if (compBtn) {
       compBtn.addEventListener("click", function () {
-        toast("Added to comparison list");
+        toast(t("addedCompare", "Added to comparison list"));
       });
     }
     var shareBtn = document.querySelector("[data-set-share]");
     if (shareBtn) {
       shareBtn.addEventListener("click", function () {
-        if (navigator.clipboard) {
-          navigator.clipboard.writeText(window.location.href);
-          toast("Product link copied to clipboard!");
-        } else {
-          toast("Share link ready");
+        copyText(window.location.href).then(function () {
+          toast(t("linkCopied", "Product link copied to clipboard!"));
+        });
+      });
+    }
+
+    // Telegram, Instagram, Facebook sharing on /product
+    var shareUrl = window.location.href;
+    var titleEl = document.getElementById("pdp-title");
+    var shareTitle = titleEl ? titleEl.textContent.trim() : document.title;
+    var tgShare = document.querySelector("[data-share-telegram]");
+    if (tgShare) {
+      tgShare.href = "https://t.me/share/url?url=" + encodeURIComponent(shareUrl) + "&text=" + encodeURIComponent(shareTitle);
+    }
+    var fbShare = document.querySelector("[data-share-facebook]");
+    if (fbShare) {
+      fbShare.href = "https://www.facebook.com/sharer/sharer.php?u=" + encodeURIComponent(shareUrl);
+    }
+    var igShare = document.querySelector("[data-share-instagram]");
+    if (igShare) {
+      igShare.addEventListener("click", function () {
+        copyText(shareUrl).then(function () {
+          toast(t("instagramCopied", "Product link copied! Paste in Instagram to share."));
+        });
+        if (navigator.share && ("ontouchstart" in window || navigator.maxTouchPoints > 0)) {
+          navigator.share({ title: shareTitle, url: shareUrl }).catch(function () {});
         }
       });
     }
@@ -1042,13 +1084,13 @@
       if (!re.test(val)) {
         input.classList.add("is-invalid");
         input.setAttribute("aria-invalid", "true");
-        if (msg) { msg.textContent = "Please enter a valid email address."; msg.classList.add("is-error"); }
+        if (msg) { msg.textContent = t("invalidEmail", "Please enter a valid email address."); msg.classList.add("is-error"); }
         input.focus();
         return;
       }
       input.classList.remove("is-invalid");
       input.removeAttribute("aria-invalid");
-      if (msg) { msg.textContent = "Thanks! Your $10 code is on its way to your inbox."; msg.classList.remove("is-error"); }
+      if (msg) { msg.textContent = t("newsletterOk", "Thanks! Your $10 code is on its way to your inbox."); msg.classList.remove("is-error"); }
       form.reset();
     });
   }

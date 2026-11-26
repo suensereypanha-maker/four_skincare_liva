@@ -1,6 +1,19 @@
 <?php
 
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Route;
+
+Route::get('/lang/{locale}', function (Request $request, string $locale): RedirectResponse {
+    $supported = ['en', 'km'];
+    $target = in_array($locale, $supported, true) ? $locale : 'en';
+
+    $request->session()->put('locale', $target);
+    Cookie::queue('liva_locale', $target, 60 * 24 * 365);
+
+    return redirect()->back(fallback: route('home'));
+})->name('lang.switch');
 
 Route::get('/', function () {
     return view('index');
